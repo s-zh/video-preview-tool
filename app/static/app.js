@@ -143,7 +143,7 @@ function showTaskDetailView(status) {
   const body = document.getElementById('taskDetailBody');
   body.innerHTML = '' +
     '<div class="detail-grid">' +
-      '<div class="detail-item"><span class="detail-label">状态</span><span class="task-badge task-badge-' + status.status + '">' + statusText(status.status) + '</span></div>' +
+      '<div class="detail-item"><span class="detail-label">状态</span><span class="task-badge-text task-badge-text-' + status.status + '">' + statusText(status.status) + '</span></div>' +
       '<div class="detail-item"><span class="detail-label">进度</span><span>' + status.progress + '%</span></div>' +
       '<div class="detail-item"><span class="detail-label">完成</span><span>' + status.completed_files + ' / ' + status.total_files + '</span></div>' +
       (status.failed_files.length ? '<div class="detail-item"><span class="detail-label">失败</span><span class="failed-count">' + status.failed_files.length + ' 个</span></div>' : '') +

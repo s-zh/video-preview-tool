@@ -188,6 +188,25 @@ async function deleteTask(taskId) {
   } catch (e) { showError('删除失败：' + e.message); }
 }
 
+async function cleanupTasks() {
+  const hasFinished = state.tasks.some(t => t.status === 'completed' || t.status === 'cancelled');
+  if (!hasFinished) return;
+  if (!confirm('确定要清理所有已完成/已取消的任务吗？\n生成的预览图文件不会被删除。')) return;
+
+  try {
+    if (state.pollingTimer) { clearInterval(state.pollingTimer); state.pollingTimer = null; }
+    const data = await api('/api/tasks/cleanup', {});
+    state.activeTaskId = null;
+    sessionStorage.removeItem('activeTaskId');
+    await loadTasks();
+    if (state.tasks.length > 0) {
+      await selectTask(state.tasks[0].id);
+    } else {
+      showNewTaskView();
+    }
+  } catch (e) { showError('清理失败：' + e.message); }
+}
+
 function statusText(s) {
   return { running: '运行中', completed: '已完成', cancelled: '已取消', cancelling: '取消中' }[s] || s;
 }

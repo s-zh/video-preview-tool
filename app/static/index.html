@@ -13,7 +13,10 @@
   <div class="task-bar">
     <div class="task-bar-header">
       <span class="task-bar-title">任务列表</span>
-      <button id="btnNewTask" onclick="newTask()">+ 新建任务</button>
+      <div class="task-bar-actions">
+        <button id="btnCleanup" onclick="cleanupTasks()" title="清理所有已完成/已取消的任务">清理旧任务</button>
+        <button id="btnNewTask" onclick="newTask()">+ 新建任务</button>
+      </div>
     </div>
     <div id="taskList" class="task-list"></div>
   </div>

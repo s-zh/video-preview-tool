@@ -23,6 +23,4 @@ services:
       - BASE_PATH=/mnt/host
       - PORT=8080
       - CONCURRENCY=4
-      - MAX_TASKS=50
-      - TASK_TTL_HOURS=24
     restart: unless-stopped

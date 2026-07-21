@@ -38,6 +38,12 @@ h1 {
   background: #fafafa;
 }
 
+.task-bar-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .task-bar-title {
   font-weight: 600;
   font-size: 14px;

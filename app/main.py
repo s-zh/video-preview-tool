@@ -1,5 +1,6 @@
 import os
 import io
+import json
 import time
 import uuid
 import asyncio
@@ -32,6 +33,59 @@ VIDEO_EXTENSIONS = {
 tasks: dict = {}
 
 CONCURRENCY = int(os.environ.get("CONCURRENCY", "2"))
+TASKS_DB_PATH = os.environ.get("TASKS_DB_PATH",
+    os.path.join(tempfile.gettempdir(), "video-preview-tool", "tasks.json"))
+
+
+def _save_tasks():
+    try:
+        data = {}
+        for tid, t in tasks.items():
+            d = dict(t)
+            d.pop("process", None)
+            d.pop("_persisted", None)
+            data[tid] = d
+        Path(TASKS_DB_PATH).parent.mkdir(parents=True, exist_ok=True)
+        tmp = TASKS_DB_PATH + ".tmp"
+        with open(tmp, "w") as f:
+            json.dump(data, f, ensure_ascii=False, default=str)
+        os.replace(tmp, TASKS_DB_PATH)
+    except Exception as e:
+        logger.warning(f"Failed to save tasks: {e}")
+
+
+def _load_tasks():
+    try:
+        if not os.path.exists(TASKS_DB_PATH):
+            return
+        with open(TASKS_DB_PATH) as f:
+            data = json.load(f)
+        for tid, d in data.items():
+            d["cancelled"] = True
+            if d.get("status") in ("running", "cancelling"):
+                d["status"] = "cancelled"
+            d["process"] = None
+            d["_persisted"] = True
+            tasks[tid] = d
+        logger.info(f"Loaded {len(data)} tasks from {TASKS_DB_PATH}")
+    except Exception as e:
+        logger.warning(f"Failed to load tasks: {e}")
+
+
+def _cleanup_orphan_previews():
+    preview_base = Path(tempfile.gettempdir()) / "previews"
+    if not preview_base.exists():
+        return
+    known = set()
+    for t in tasks.values():
+        for r in t.get("results", []):
+            p = Path(r)
+            if str(p).startswith(str(preview_base)):
+                known.add(p.parent.name)
+    for child in preview_base.iterdir():
+        if child.is_dir() and child.name not in known:
+            shutil.rmtree(child, ignore_errors=True)
+            logger.info(f"Cleaned up orphan preview dir: {child.name}")
 
 _SEMAPHORE: Optional[asyncio.Semaphore] = None
 _HWACCEL_INFO: Optional[dict] = None
@@ -305,6 +359,7 @@ async def start_task(req: StartRequest):
     }
 
     asyncio.create_task(_run_task(task_id))
+    _save_tasks()
     return {"task_id": task_id}
 
 
@@ -347,6 +402,7 @@ async def delete_task(task_id: str):
 
     del tasks[task_id]
     _cleanup_temp_previews(task_id)
+    _save_tasks()
     logger.info(f"Deleted task {task_id}")
     return {"status": "ok"}
 
@@ -366,6 +422,7 @@ async def cleanup_tasks():
     for tid in to_remove:
         _cleanup_temp_previews(tid)
         del tasks[tid]
+    _save_tasks()
     logger.info(f"Cleaned up {len(to_remove)} old tasks")
     return {"removed": len(to_remove)}
 
@@ -383,6 +440,7 @@ async def cancel_task(task_id: str):
                 task["process"].kill()
             except Exception:
                 pass
+    _save_tasks()
     return {"status": "ok"}
 
 
@@ -403,6 +461,7 @@ async def retry_task(task_id: str):
     task["current_file"] = ""
 
     asyncio.create_task(_run_task(task_id, retry_files=failed))
+    _save_tasks()
     return {"status": "ok", "retry_count": len(failed)}
 
 
@@ -543,6 +602,7 @@ async def _run_task(task_id: str, retry_files: Optional[list] = None):
     task["status"] = "completed" if not task["cancelled"] else "cancelled"
     task["current_file"] = ""
     task["process"] = None
+    _save_tasks()
 
 
 async def _generate_preview(
@@ -645,3 +705,9 @@ async def _get_duration(video_path: str) -> Optional[float]:
 STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
 if os.path.isdir(STATIC_DIR):
     app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")
+
+
+@app.on_event("startup")
+async def _on_startup():
+    _load_tasks()
+    _cleanup_orphan_previews()

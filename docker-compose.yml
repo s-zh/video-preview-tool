@@ -9,6 +9,7 @@ services:
       - "8080:8080"
     volumes:
       - /:/mnt/host:rw
+      - video-preview-data:/tmp/video-preview-tool
     devices:
       - /dev/dri:/dev/dri
     # NVIDIA GPU 用户：取消下面注释（需安装 nvidia-container-toolkit）
@@ -24,3 +25,6 @@ services:
       - PORT=8080
       - CONCURRENCY=4
     restart: unless-stopped
+
+volumes:
+  video-preview-data:

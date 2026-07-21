@@ -181,6 +181,7 @@ curl -X POST http://localhost:8080/api/start \
 | `BASE_PATH` | `/mnt/host` | 文件系统浏览的根路径 |
 | `CONCURRENCY` | `2` | 最大并行处理的视频数 |
 | `PORT` | `8080` | HTTP 监听端口 |
+| `TASKS_DB_PATH` | 自动 | 任务持久化 JSON 文件路径，默认在系统临时目录 |
 | `DRAWTEXT_FONT` | 自动检测 | 自定义时间戳字体路径 |
 
 ## 项目结构

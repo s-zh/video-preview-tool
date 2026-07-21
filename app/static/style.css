@@ -498,8 +498,7 @@ button.btn-warning:hover:not(:disabled) { background: #ffc53d; }
   max-height: 90vh;
   object-fit: contain;
   border-radius: 4px;
-  cursor: zoom-in;
-  transition: transform 0.2s;
+  transition: transform 0.15s;
   user-select: none;
 }
 

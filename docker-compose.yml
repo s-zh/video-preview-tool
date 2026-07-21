@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  video-preview:
+    build: ./app
+    container_name: video-preview-tool
+    ports:
+      - "8080:8080"
+    volumes:
+      - /:/mnt/host:rw
+    devices:
+      - /dev/dri:/dev/dri
+    # NVIDIA GPU 用户：取消下面注释（需安装 nvidia-container-toolkit）
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+    environment:
+      - BASE_PATH=/mnt/host
+      - PORT=8080
+      - CONCURRENCY=4
+    restart: unless-stopped

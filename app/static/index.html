@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>视频预览图生成工具</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+  <h1>视频预览图生成工具</h1>
+
+  <div class="task-bar">
+    <div class="task-bar-header">
+      <span class="task-bar-title">任务列表</span>
+      <button id="btnNewTask" onclick="newTask()">+ 新建任务</button>
+    </div>
+    <div id="taskList" class="task-list"></div>
+  </div>
+
+  <div id="newTaskArea">
+    <div class="card">
+      <div class="card-header"><h2>选择目录</h2></div>
+      <div class="card-body">
+        <div class="path-row">
+          <span class="path-label">当前路径：</span>
+          <span id="displayPath" class="path-value">/</span>
+        </div>
+        <div class="btn-row">
+          <button id="btnParent" onclick="goUp()" disabled>上级目录</button>
+          <button onclick="refreshBrowse()">刷新</button>
+        </div>
+        <div id="browser" class="browser"><div class="hint">正在加载...</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h2>视频文件</h2></div>
+      <div class="card-body">
+        <div class="btn-row">
+          <button id="btnScan" onclick="scanDirectory()">扫描视频</button>
+          <label class="checkbox-label">
+            <input type="checkbox" id="selectAll" onchange="toggleSelectAll()" disabled> 全选
+          </label>
+          <span id="fileCount" class="file-count">已找到 0 个视频文件</span>
+        </div>
+        <div id="fileList" class="file-list"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h2>生成预览图</h2></div>
+      <div class="card-body">
+        <div class="grid-config">
+          <label>网格列：<input type="number" id="gridCols" value="6" min="1" max="12"></label>
+          <label>网格行：<input type="number" id="gridRows" value="4" min="1" max="12"></label>
+          <label>缩略图宽：<input type="number" id="thumbWidth" value="320" min="80" step="10"></label>
+          <label>缩略图高：<input type="number" id="thumbHeight" value="180" min="60" step="10"></label>
+          <label class="checkbox-label"><input type="checkbox" id="showTimestamps" checked> 显示时间戳</label>
+        </div>
+        <div class="btn-row">
+          <button id="btnGenerate" class="btn-primary" onclick="startGeneration()" disabled>生成预览图</button>
+          <button id="btnCancel" class="btn-danger" onclick="cancelGeneration()" disabled>取消任务</button>
+          <button id="btnDownload" class="btn-success" onclick="downloadResults()" disabled>下载预览图 (ZIP)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="taskDetailArea" style="display:none">
+    <div class="card">
+      <div class="card-header">
+        <h2>任务详情</h2>
+      </div>
+      <div class="card-body">
+        <div class="path-row">
+          <span class="path-label">目录：</span>
+          <span id="taskDetailPath" class="path-value">/</span>
+        </div>
+        <div id="taskDetailBody"></div>
+        <div id="fileStatusContainer"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="progressArea" class="card" style="display:none">
+    <div class="card-header"><h2>生成进度</h2></div>
+    <div class="card-body">
+      <div class="progress-section">
+        <div class="progress-bar">
+          <div id="progressFill" class="progress-fill"></div>
+        </div>
+        <div class="progress-info">
+          <span id="progressPercent">0%</span>
+          <span id="currentFile" class="current-file"></span>
+        </div>
+        <div class="progress-detail">
+          已完成 <span id="completedCount">0</span> / <span id="totalCount">0</span>
+          <span id="failedDisplay" class="failed-count"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="errorCard" class="card card-error" style="display:none">
+    <div class="card-header"><h2>错误信息</h2></div>
+    <div class="card-body"><div id="errorList"></div></div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

@@ -192,6 +192,7 @@ class StartRequest(BaseModel):
     thumb_width: int = 320
     thumb_height: int = 180
     show_timestamps: bool = False
+    save_to_source: bool = False
 
 
 def validate_path(path: str) -> Path:
@@ -297,6 +298,7 @@ async def start_task(req: StartRequest):
         "thumb_width": req.thumb_width,
         "thumb_height": req.thumb_height,
         "show_timestamps": req.show_timestamps,
+        "save_to_source": req.save_to_source,
         "process": None,
         "start_time": time.time(),
     }
@@ -342,8 +344,15 @@ async def delete_task(task_id: str):
                 pass
 
     del tasks[task_id]
+    _cleanup_temp_previews(task_id)
     logger.info(f"Deleted task {task_id}")
     return {"status": "ok"}
+
+
+def _cleanup_temp_previews(task_id: str):
+    preview_dir = Path(tempfile.gettempdir()) / "previews" / task_id
+    if preview_dir.exists():
+        shutil.rmtree(preview_dir, ignore_errors=True)
 
 
 @app.post("/api/tasks/cleanup")
@@ -353,6 +362,7 @@ async def cleanup_tasks():
         if t["status"] in ("completed", "cancelled")
     ]
     for tid in to_remove:
+        _cleanup_temp_previews(tid)
         del tasks[tid]
     logger.info(f"Cleaned up {len(to_remove)} old tasks")
     return {"removed": len(to_remove)}
@@ -524,7 +534,12 @@ async def _generate_preview(
     tw: int, th: int, task: dict, hw_info: Optional[dict] = None
 ) -> tuple[Optional[str], str]:
     video = Path(video_path)
-    output_path = video.parent / f"{video.stem}.jpg"
+    if task.get("save_to_source"):
+        output_path = video.parent / f"{video.stem}.jpg"
+    else:
+        temp_dir = Path(tempfile.gettempdir()) / "previews" / task["id"]
+        temp_dir.mkdir(parents=True, exist_ok=True)
+        output_path = temp_dir / f"{video.stem}.jpg"
 
     duration = await _get_duration(video_path)
     if duration is None or duration <= 0:

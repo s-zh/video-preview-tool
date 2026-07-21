@@ -382,6 +382,7 @@ async function startGeneration() {
     thumb_width: parseInt(document.getElementById('thumbWidth').value) || 320,
     thumb_height: parseInt(document.getElementById('thumbHeight').value) || 180,
     show_timestamps: document.getElementById('showTimestamps').checked,
+    save_to_source: document.getElementById('saveToSource').checked,
   };
 
   try {

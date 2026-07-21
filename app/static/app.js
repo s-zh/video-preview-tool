@@ -169,7 +169,7 @@ async function cancelTaskDetail(taskId) {
 }
 
 async function deleteTask(taskId) {
-  if (!confirm('确定要删除此任务吗？\n源视频同目录生成的预览图文件不会被删除。')) return;
+  if (!confirm('确定要删除此任务吗？\n在源视频同目录下生成的预览图文件不会被删除。')) return;
   try {
     if (state.pollingTimer && state.activeTaskId === taskId) {
       clearInterval(state.pollingTimer); state.pollingTimer = null;
@@ -191,7 +191,7 @@ async function deleteTask(taskId) {
 async function cleanupTasks() {
   const hasFinished = state.tasks.some(t => t.status === 'completed' || t.status === 'cancelled');
   if (!hasFinished) return;
-  if (!confirm('确定要清理所有已完成/已取消的任务吗？\n源视频同目录生成的预览图文件不会被删除。')) return;
+  if (!confirm('确定要清理所有已完成/已取消的任务吗？\n在源视频同目录下生成的预览图文件不会被删除。')) return;
 
   try {
     if (state.pollingTimer) { clearInterval(state.pollingTimer); state.pollingTimer = null; }

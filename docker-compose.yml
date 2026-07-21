@@ -2,8 +2,9 @@ version: '3.8'
 
 services:
   video-preview:
-    build: ./app
+    image: ghcr.io/s-zh/video-preview-tool:latest
     container_name: video-preview-tool
+    pull_policy: always
     ports:
       - "8080:8080"
     volumes:

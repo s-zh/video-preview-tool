@@ -40,7 +40,18 @@
 ### Docker 部署（推荐）
 
 ```bash
-# Intel/AMD GPU (VAAPI)
+docker compose up -d
+```
+
+更新镜像：
+
+```bash
+docker compose pull && docker compose up -d
+```
+
+或手动运行：
+
+```bash
 docker run -d --name video-preview \
   -p 8080:8080 \
   -v /:/mnt/host:rw \
@@ -48,12 +59,6 @@ docker run -d --name video-preview \
   -e CONCURRENCY=4 \
   --restart unless-stopped \
   ghcr.io/s-zh/video-preview-tool:latest
-```
-
-或使用 docker-compose：
-
-```bash
-docker compose up -d
 ```
 
 然后打开浏览器访问 `http://<主机IP>:8080`。

@@ -39,6 +39,15 @@
 
 ### Docker 部署（推荐）
 
+部署前请先检查 `docker-compose.yml` 并根据需要修改配置：
+
+- **挂载卷** — 默认 `- /:/mnt/host:rw` 将宿主机根目录挂载到容器，如需限制访问范围，改为 `- /data/videos:/mnt/host:rw`
+- **设备映射** — Intel/AMD GPU 需要 `- /dev/dri:/dev/dri`；NVIDIA GPU 见 `docker-compose.yml` 注释
+- **端口** — 默认 `8080:8080`，可改为其他端口
+- **并发数** — 通过环境变量 `CONCURRENCY` 调整
+
+确认配置无误后启动：
+
 ```bash
 docker compose up -d
 ```

@@ -113,9 +113,18 @@
   </div>
 </div>
 
-<div id="lightbox" class="lightbox" onclick="closeLightbox()" style="display:none">
-  <span class="lightbox-close">&times;</span>
-  <img id="lightboxImg" class="lightbox-img" src="">
+<div id="lightbox" class="lightbox" style="display:none">
+  <div class="lightbox-toolbar">
+    <span id="lbCounter" class="lb-counter">1 / 1</span>
+    <div class="lb-zoom-group">
+      <button class="lb-btn" onclick="lbZoomOut()" title="缩小">−</button>
+      <button class="lb-btn" onclick="lbZoomIn()" title="放大">+</button>
+    </div>
+    <button class="lb-btn lb-close" onclick="closeLightbox()" title="关闭 (Esc)">&times;</button>
+  </div>
+  <button id="lbPrev" class="lb-nav lb-prev" onclick="lbPrev()" title="上一张 (&larr;)">&#8249;</button>
+  <button id="lbNext" class="lb-nav lb-next" onclick="lbNext()" title="下一张 (&rarr;)">&#8250;</button>
+  <img id="lightboxImg" class="lightbox-img" src="" onclick="lbZoomIn()">
 </div>
 
 <script src="app.js"></script>

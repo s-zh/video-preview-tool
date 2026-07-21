@@ -175,7 +175,7 @@ function renderPreviewGallery(status) {
 
   let html = '<div class="gallery-section"><div class="gallery-header">预览图</div><div class="gallery-grid">';
   status.results.forEach((_, i) => {
-    html += '<div class="gallery-item" onclick="openLightbox(\'' + status.id + '\',' + i + ')">' +
+    html += '<div class="gallery-item" onclick="openLightbox(\'' + status.id + '\',' + i + ',' + status.results.length + ')">' +
       '<img src="/api/preview/' + status.id + '/' + i + '" loading="lazy" alt="预览图 ' + (i + 1) + '">' +
       '</div>';
   });
@@ -183,16 +183,56 @@ function renderPreviewGallery(status) {
   container.innerHTML = html;
 }
 
-function openLightbox(taskId, index) {
-  const overlay = document.getElementById('lightbox');
+const _lb = { taskId: '', index: 0, total: 0, zoom: 1 };
+
+function openLightbox(taskId, index, total) {
+  _lb.taskId = taskId;
+  _lb.index = index;
+  _lb.total = total;
+  _lb.zoom = 1;
+  updateLightbox();
+  document.getElementById('lightbox').style.display = 'flex';
+}
+
+function updateLightbox() {
   const img = document.getElementById('lightboxImg');
-  img.src = '/api/preview/' + taskId + '/' + index;
-  overlay.style.display = 'flex';
+  img.src = '/api/preview/' + _lb.taskId + '/' + _lb.index;
+  img.style.transform = 'scale(' + _lb.zoom + ')';
+  document.getElementById('lbCounter').textContent = (_lb.index + 1) + ' / ' + _lb.total;
+  document.getElementById('lbPrev').style.display = _lb.index > 0 ? 'flex' : 'none';
+  document.getElementById('lbNext').style.display = _lb.index < _lb.total - 1 ? 'flex' : 'none';
+}
+
+function lbPrev() {
+  if (_lb.index > 0) { _lb.index--; _lb.zoom = 1; updateLightbox(); }
+}
+
+function lbNext() {
+  if (_lb.index < _lb.total - 1) { _lb.index++; _lb.zoom = 1; updateLightbox(); }
+}
+
+function lbZoomIn() {
+  _lb.zoom = Math.min(_lb.zoom * 1.5, 5);
+  document.getElementById('lightboxImg').style.transform = 'scale(' + _lb.zoom + ')';
+}
+
+function lbZoomOut() {
+  _lb.zoom = Math.max(_lb.zoom / 1.5, 0.2);
+  document.getElementById('lightboxImg').style.transform = 'scale(' + _lb.zoom + ')';
 }
 
 function closeLightbox() {
   document.getElementById('lightbox').style.display = 'none';
 }
+
+document.addEventListener('keydown', function(e) {
+  if (document.getElementById('lightbox').style.display !== 'flex') return;
+  if (e.key === 'ArrowLeft') lbPrev();
+  else if (e.key === 'ArrowRight') lbNext();
+  else if (e.key === '+' || e.key === '=') lbZoomIn();
+  else if (e.key === '-') lbZoomOut();
+  else if (e.key === 'Escape') closeLightbox();
+});
 
 async function cancelTaskDetail(taskId) {
   try { await api('/api/cancel/' + taskId, {}); } catch (e) { showError('取消失败：' + e.message); }

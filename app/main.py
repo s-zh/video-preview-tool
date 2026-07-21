@@ -436,6 +436,19 @@ async def download_results(task_id: str):
     )
 
 
+@app.get("/api/preview/{task_id}/{index}")
+async def preview_image(task_id: str, index: int):
+    task = tasks.get(task_id)
+    if not task:
+        raise HTTPException(404, "Task not found")
+    if index < 0 or index >= len(task["results"]):
+        raise HTTPException(404, "Preview not found")
+    img_path = task["results"][index]
+    if not os.path.exists(img_path):
+        raise HTTPException(404, "File not found")
+    return FileResponse(img_path, media_type="image/jpeg")
+
+
 @app.get("/api/tasks")
 async def list_tasks():
     result = []

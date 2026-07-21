@@ -162,6 +162,36 @@ function showTaskDetailView(status) {
     body.innerHTML += '<div class="btn-row" style="margin-top:8px"><button class="btn-warning" onclick="retryFailed(\'' + status.id + '\')">重试失败 (' + status.failed_files.length + ' 个)</button></div>';
   }
   body.innerHTML += '<div class="btn-row" style="margin-top:12px;border-top:1px solid #eee;padding-top:12px"><button class="btn-danger" onclick="deleteTask(\'' + status.id + '\')" style="opacity:0.6">删除任务</button></div>';
+
+  renderPreviewGallery(status);
+}
+
+function renderPreviewGallery(status) {
+  const container = document.getElementById('previewGallery');
+  if (status.status !== 'completed' || !status.results || !status.results.length) {
+    container.innerHTML = '';
+    return;
+  }
+
+  let html = '<div class="gallery-section"><div class="gallery-header">预览图</div><div class="gallery-grid">';
+  status.results.forEach((_, i) => {
+    html += '<div class="gallery-item" onclick="openLightbox(\'' + status.id + '\',' + i + ')">' +
+      '<img src="/api/preview/' + status.id + '/' + i + '" loading="lazy" alt="预览图 ' + (i + 1) + '">' +
+      '</div>';
+  });
+  html += '</div></div>';
+  container.innerHTML = html;
+}
+
+function openLightbox(taskId, index) {
+  const overlay = document.getElementById('lightbox');
+  const img = document.getElementById('lightboxImg');
+  img.src = '/api/preview/' + taskId + '/' + index;
+  overlay.style.display = 'flex';
+}
+
+function closeLightbox() {
+  document.getElementById('lightbox').style.display = 'none';
 }
 
 async function cancelTaskDetail(taskId) {

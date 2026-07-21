@@ -82,6 +82,7 @@
           <span id="taskDetailPath" class="path-value">/</span>
         </div>
         <div id="taskDetailBody"></div>
+        <div id="previewGallery"></div>
         <div id="fileStatusContainer"></div>
       </div>
     </div>
@@ -110,6 +111,11 @@
     <div class="card-header"><h2>错误信息</h2></div>
     <div class="card-body"><div id="errorList"></div></div>
   </div>
+</div>
+
+<div id="lightbox" class="lightbox" onclick="closeLightbox()" style="display:none">
+  <span class="lightbox-close">&times;</span>
+  <img id="lightboxImg" class="lightbox-img" src="">
 </div>
 
 <script src="app.js"></script>

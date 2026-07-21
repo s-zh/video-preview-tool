@@ -488,6 +488,7 @@ button.btn-warning:hover:not(:disabled) { background: #ffc53d; }
 }
 
 .gallery-item:hover { border-color: #1677ff; }
+.gallery-item-active { border-color: #1677ff; box-shadow: 0 0 0 2px #1677ff; }
 
 .gallery-item img {
   width: 100%;

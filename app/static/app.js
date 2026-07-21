@@ -174,10 +174,11 @@ function renderPreviewGallery(status) {
   }
 
   const sources = status.result_sources || [];
+  const sourcesEncoded = encodeURIComponent(JSON.stringify(sources));
   let html = '<div class="gallery-section"><div class="gallery-header">预览图</div><div class="gallery-grid">';
   status.results.forEach((_, i) => {
-    const src = sources[i] || '';
-    html += '<div class="gallery-item" onclick="openLightbox(\'' + status.id + '\',' + i + ',' + status.results.length + ',\'' + escapeHtml(src) + '\')">' +
+    const active = (status.id === _lb.lastViewedTaskId && i === _lb.lastViewedIndex);
+    html += '<div class="gallery-item' + (active ? ' gallery-item-active' : '') + '" onclick="openLightbox(\'' + status.id + '\',' + i + ',' + status.results.length + ',\'' + sourcesEncoded + '\')">' +
       '<img src="/api/preview/' + status.id + '/' + i + '" loading="lazy" alt="预览图 ' + (i + 1) + '">' +
       '</div>';
   });
@@ -185,14 +186,15 @@ function renderPreviewGallery(status) {
   container.innerHTML = html;
 }
 
-const _lb = { taskId: '', index: 0, total: 0, zoom: 1, source: '', panX: 0, panY: 0, dragging: false, startX: 0, startY: 0, startPanX: 0, startPanY: 0 };
+const _lb = { taskId: '', index: 0, total: 0, zoom: 1, source: '', sources: [], panX: 0, panY: 0, dragging: false, startX: 0, startY: 0, startPanX: 0, startPanY: 0, lastViewedTaskId: '', lastViewedIndex: -1 };
 
-function openLightbox(taskId, index, total, source) {
+function openLightbox(taskId, index, total, sourcesEncoded) {
+  _lb.lastViewedTaskId = '';
   _lb.taskId = taskId;
   _lb.index = index;
   _lb.total = total;
+  _lb.sources = JSON.parse(decodeURIComponent(sourcesEncoded));
   _lb.zoom = 1;
-  _lb.source = source || '';
   _lb.panX = 0;
   _lb.panY = 0;
   updateLightbox();
@@ -351,6 +353,7 @@ function updateLightbox() {
   img.src = '/api/preview/' + _lb.taskId + '/' + _lb.index;
   img.style.transform = 'scale(' + _lb.zoom + ')';
   document.getElementById('lbCounter').textContent = (_lb.index + 1) + ' / ' + _lb.total;
+  _lb.source = _lb.sources[_lb.index] || '';
   document.getElementById('lbSource').textContent = _lb.source;
   document.getElementById('lbPrev').style.display = _lb.index > 0 ? 'flex' : 'none';
   document.getElementById('lbNext').style.display = _lb.index < _lb.total - 1 ? 'flex' : 'none';
@@ -375,7 +378,12 @@ function lbZoomOut() {
 }
 
 function closeLightbox() {
+  _lb.lastViewedTaskId = _lb.taskId;
+  _lb.lastViewedIndex = _lb.index;
   document.getElementById('lightbox').style.display = 'none';
+
+  const items = document.querySelectorAll('#previewGallery .gallery-item');
+  items.forEach((el, i) => el.classList.toggle('gallery-item-active', i === _lb.lastViewedIndex));
 }
 
 document.addEventListener('keydown', function(e) {

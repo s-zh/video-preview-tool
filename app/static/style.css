@@ -551,6 +551,24 @@ button.btn-warning:hover:not(:disabled) { background: #ffc53d; }
   background: transparent;
 }
 
+.lb-source {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  padding: 10px 16px;
+  background: linear-gradient(0deg, rgba(0,0,0,0.6) 0%, transparent 100%);
+  color: #ccc;
+  font-size: 12px;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  text-align: center;
+  z-index: 1001;
+  user-select: text;
+  -webkit-user-select: text;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  pointer-events: auto;
+}
+
 .lb-nav {
   position: fixed;
   top: 50%;

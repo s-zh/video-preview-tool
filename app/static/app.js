@@ -173,9 +173,11 @@ function renderPreviewGallery(status) {
     return;
   }
 
+  const sources = status.result_sources || [];
   let html = '<div class="gallery-section"><div class="gallery-header">预览图</div><div class="gallery-grid">';
   status.results.forEach((_, i) => {
-    html += '<div class="gallery-item" onclick="openLightbox(\'' + status.id + '\',' + i + ',' + status.results.length + ')">' +
+    const src = sources[i] || '';
+    html += '<div class="gallery-item" onclick="openLightbox(\'' + status.id + '\',' + i + ',' + status.results.length + ',\'' + escapeHtml(src) + '\')">' +
       '<img src="/api/preview/' + status.id + '/' + i + '" loading="lazy" alt="预览图 ' + (i + 1) + '">' +
       '</div>';
   });
@@ -183,13 +185,14 @@ function renderPreviewGallery(status) {
   container.innerHTML = html;
 }
 
-const _lb = { taskId: '', index: 0, total: 0, zoom: 1 };
+const _lb = { taskId: '', index: 0, total: 0, zoom: 1, source: '' };
 
-function openLightbox(taskId, index, total) {
+function openLightbox(taskId, index, total, source) {
   _lb.taskId = taskId;
   _lb.index = index;
   _lb.total = total;
   _lb.zoom = 1;
+  _lb.source = source || '';
   updateLightbox();
   document.getElementById('lightbox').style.display = 'flex';
 }
@@ -199,6 +202,7 @@ function updateLightbox() {
   img.src = '/api/preview/' + _lb.taskId + '/' + _lb.index;
   img.style.transform = 'scale(' + _lb.zoom + ')';
   document.getElementById('lbCounter').textContent = (_lb.index + 1) + ' / ' + _lb.total;
+  document.getElementById('lbSource').textContent = _lb.source;
   document.getElementById('lbPrev').style.display = _lb.index > 0 ? 'flex' : 'none';
   document.getElementById('lbNext').style.display = _lb.index < _lb.total - 1 ? 'flex' : 'none';
 }

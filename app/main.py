@@ -292,6 +292,7 @@ async def start_task(req: StartRequest):
         "failed_files": [],
         "cancelled": False,
         "results": [],
+        "result_sources": [],
         "files": valid_files,
         "grid_cols": req.grid_cols,
         "grid_rows": req.grid_rows,
@@ -324,6 +325,7 @@ async def get_status(task_id: str):
         "completed_files": task["completed_files"],
         "failed_files": task["failed_files"],
         "results": task["results"],
+        "result_sources": task.get("result_sources", []),
         "file_statuses": task.get("file_statuses", {}),
         "file_errors": task.get("file_errors", {}),
     }
@@ -513,6 +515,7 @@ async def _run_task(task_id: str, retry_files: Optional[list] = None):
             if output:
                 task["file_statuses"][video_path] = "success"
                 task["results"].append(output)
+                task["result_sources"].append(video_path)
                 task["completed_files"] += 1
             else:
                 task["file_statuses"][video_path] = "failed"

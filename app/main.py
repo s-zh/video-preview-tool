@@ -32,6 +32,8 @@ VIDEO_EXTENSIONS = {
 tasks: dict = {}
 
 CONCURRENCY = int(os.environ.get("CONCURRENCY", "2"))
+MAX_TASKS = int(os.environ.get("MAX_TASKS", "50"))
+TASK_TTL_HOURS = int(os.environ.get("TASK_TTL_HOURS", "24"))
 
 _SEMAPHORE: Optional[asyncio.Semaphore] = None
 _HWACCEL_INFO: Optional[dict] = None
@@ -505,6 +507,30 @@ async def _run_task(task_id: str, retry_files: Optional[list] = None):
     task["status"] = "completed" if not task["cancelled"] else "cancelled"
     task["current_file"] = ""
     task["process"] = None
+
+    _prune_tasks()
+
+
+def _prune_tasks():
+    now = time.time()
+    # 按 start_time 降序排列已完成/已取消的任务
+    finished = [
+        (tid, t) for tid, t in tasks.items()
+        if t["status"] in ("completed", "cancelled")
+    ]
+    finished.sort(key=lambda x: x[1].get("start_time", 0), reverse=True)
+
+    # 保留最近 MAX_TASKS 个
+    for tid, t in finished[MAX_TASKS:]:
+        del tasks[tid]
+        logger.info(f"Pruned old task {tid}")
+
+    # 删除超过 TTL 的旧任务（即使还在 MAX_TASKS 内）
+    cutoff = now - TASK_TTL_HOURS * 3600
+    for tid, t in finished[:MAX_TASKS]:
+        if t.get("start_time", 0) < cutoff:
+            del tasks[tid]
+            logger.info(f"Pruned expired task {tid}")
 
 
 async def _generate_preview(

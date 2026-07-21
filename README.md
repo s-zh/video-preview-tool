@@ -176,6 +176,8 @@ curl -X POST http://localhost:8080/api/start \
 | `BASE_PATH` | `/mnt/host` | 文件系统浏览的根路径 |
 | `CONCURRENCY` | `2` | 最大并行处理的视频数 |
 | `PORT` | `8080` | HTTP 监听端口 |
+| `MAX_TASKS` | `50` | 内存中保留的最大任务数（超出自动清理） |
+| `TASK_TTL_HOURS` | `24` | 已完成任务的存活时间（小时），超期自动清理 |
 | `DRAWTEXT_FONT` | 自动检测 | 自定义时间戳字体路径 |
 
 ## 项目结构
